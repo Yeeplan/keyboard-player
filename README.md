@@ -15,9 +15,10 @@
 
 | 区域 | 按键 | 音域 |
 |------|------|------|
-| 底行 | `z x c v b n m` | C3 – B3 |
-| 主行 | `a s d f g h j k l` | C4 – D5（含中央 C）|
+| 数字行 | `1 2 3 4 5 6 7 8 9 0` | C6 – E7 |
 | 顶行 | `q w e r t y u i o p` | C5 – E6 |
+| 主行 | `a s d f g h j k l` | C4 – D5（含中央 C）|
+| 底行 | `z x c v b n m` | C3 – B3 |
 
 ## 系统要求
 
@@ -36,8 +37,11 @@ cargo build --release
 ## 使用
 
 ```bash
-# 纯键盘 + 自动节拍（默认 120 BPM）
+# 纯键盘，无伴奏
 ./target/release/keyboard-player
+
+# 纯键盘 + 自动节拍（默认 120 BPM）
+./target/release/keyboard-player --beat
 
 # 指定伴奏文件（循环播放）
 ./target/release/keyboard-player --accompaniment song.mp3
@@ -55,6 +59,7 @@ cargo build --release
 | 参数 | 简写 | 默认值 | 说明 |
 |------|------|--------|------|
 | `--accompaniment` | `-a` | 无 | 伴奏音频文件路径 |
+| `--beat` | — | `false` | 开启自动节拍（无伴奏文件时生效） |
 | `--bpm` | — | `120` | 自动节拍 BPM（无伴奏文件时生效） |
 | `--note-volume` | — | `0.8` | 音符音量（0.0 – 1.0） |
 | `--acc-volume` | — | `0.5` | 伴奏/节拍音量（0.0 – 1.0） |
