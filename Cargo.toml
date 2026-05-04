@@ -1,0 +1,13 @@
+[package]
+name = "keyboard-player"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "keyboard-player"
+path = "src/main.rs"
+
+[dependencies]
+rdev = "0.5"
+rodio = { version = "0.17", features = ["mp3", "vorbis", "flac", "wav"] }
+clap = { version = "4", features = ["derive"] }
