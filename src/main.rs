@@ -29,6 +29,10 @@ struct Args {
     /// 伴奏 / 节拍音量（0.0 – 1.0）
     #[arg(long, default_value = "0.5")]
     acc_volume: f32,
+
+    /// 开启自动节拍（无伴奏文件时生效，默认关闭）
+    #[arg(long)]
+    beat: bool,
 }
 
 /// 键盘按键 → 音符频率（Hz）
@@ -66,6 +70,17 @@ fn key_to_frequency(key: &Key) -> Option<f32> {
         Key::KeyI => Some(1046.50),
         Key::KeyO => Some(1174.66),
         Key::KeyP => Some(1318.51),
+        // ---- 数字行: C6 八度 ----
+        Key::Num1 => Some(1046.50),
+        Key::Num2 => Some(1174.66),
+        Key::Num3 => Some(1318.51),
+        Key::Num4 => Some(1396.91),
+        Key::Num5 => Some(1567.98),
+        Key::Num6 => Some(1760.00),
+        Key::Num7 => Some(1975.53),
+        Key::Num8 => Some(2093.00),
+        Key::Num9 => Some(2349.32),
+        Key::Num0 => Some(2637.02),
         _ => None,
     }
 }
@@ -108,16 +123,19 @@ fn main() {
 
     println!("=== Keyboard Player ===");
     println!("键盘映射:");
-    println!("  底行 (z-m) : C3 – B3");
-    println!("  主行 (a-l) : C4 – D5  ← 中央 C 所在行");
-    println!("  顶行 (q-p) : C5 – E6");
+    println!("  数字行 (1-0) : C6 – E7");
+    println!("  顶行   (q-p) : C5 – E6");
+    println!("  主行   (a-l) : C4 – D5  ← 中央 C 所在行");
+    println!("  底行   (z-m) : C3 – B3");
     println!("按住时间越长，音符越长（1–3 秒）");
     println!("按 Ctrl+C 退出\n");
 
     if let Some(ref path) = args.accompaniment {
         println!("伴奏文件: {path}");
-    } else {
+    } else if args.beat {
         println!("自动节拍: {} BPM（4/4 拍）", args.bpm);
+    } else {
+        println!("无伴奏 / 无节拍模式（使用 --beat 开启自动节拍，-a 指定伴奏文件）");
     }
     println!();
 
@@ -128,6 +146,7 @@ fn main() {
     let acc_volume = args.acc_volume.clamp(0.0, 1.0);
     let bpm = args.bpm.clamp(20, 300);
     let accompaniment_path = args.accompaniment.clone();
+    let auto_beat_flag = args.beat;
 
     thread::spawn(move || {
         let (_stream, stream_handle) = match OutputStream::try_default() {
@@ -165,7 +184,7 @@ fn main() {
                     true
                 }
             },
-            None => true,
+            None => auto_beat_flag,
         };
 
         let beat_interval = Duration::from_millis(60_000 / bpm as u64);
