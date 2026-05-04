@@ -36,53 +36,59 @@ struct Args {
 }
 
 /// 键盘按键 → 音符频率（Hz）
-///   底行 z-m  : C3 – B3
-///   主行 a-l  : C4（中央 C）– D5
-///   顶行 q-p  : C5 – E6
+///
+/// 按照键盘物理布局从低到高排列一条连续半音阶：
+///   底行 z x c v b n m        → C3  – F#3  (MIDI 48–54)
+///   主行 a s d f g h j k l   → G3  – D#4  (MIDI 55–63)
+///   顶行 q w e r t y u i o p → E4  – C#5  (MIDI 64–73)
+///   数字 1 2 3 4 5 6 7 8 9 0 → D5  – B5   (MIDI 74–83)
 fn key_to_frequency(key: &Key) -> Option<f32> {
-    match key {
-        // ---- 底行: C3 八度 ----
-        Key::KeyZ => Some(130.81),
-        Key::KeyX => Some(146.83),
-        Key::KeyC => Some(164.81),
-        Key::KeyV => Some(174.61),
-        Key::KeyB => Some(196.00),
-        Key::KeyN => Some(220.00),
-        Key::KeyM => Some(246.94),
-        // ---- 主行: C4 八度 ----
-        Key::KeyA => Some(261.63),
-        Key::KeyS => Some(293.66),
-        Key::KeyD => Some(329.63),
-        Key::KeyF => Some(349.23),
-        Key::KeyG => Some(392.00),
-        Key::KeyH => Some(440.00),
-        Key::KeyJ => Some(493.88),
-        Key::KeyK => Some(523.25),
-        Key::KeyL => Some(587.33),
-        // ---- 顶行: C5 八度 ----
-        Key::KeyQ => Some(523.25),
-        Key::KeyW => Some(587.33),
-        Key::KeyE => Some(659.25),
-        Key::KeyR => Some(698.46),
-        Key::KeyT => Some(783.99),
-        Key::KeyY => Some(880.00),
-        Key::KeyU => Some(987.77),
-        Key::KeyI => Some(1046.50),
-        Key::KeyO => Some(1174.66),
-        Key::KeyP => Some(1318.51),
-        // ---- 数字行: C6 八度 ----
-        Key::Num1 => Some(1046.50),
-        Key::Num2 => Some(1174.66),
-        Key::Num3 => Some(1318.51),
-        Key::Num4 => Some(1396.91),
-        Key::Num5 => Some(1567.98),
-        Key::Num6 => Some(1760.00),
-        Key::Num7 => Some(1975.53),
-        Key::Num8 => Some(2093.00),
-        Key::Num9 => Some(2349.32),
-        Key::Num0 => Some(2637.02),
-        _ => None,
-    }
+    // f = 440 * 2^((midi - 69) / 12)
+    let midi: u8 = match key {
+        // ---- 底行: C3(48) → F#3(54) ----
+        Key::KeyZ => 48,
+        Key::KeyX => 49,
+        Key::KeyC => 50,
+        Key::KeyV => 51,
+        Key::KeyB => 52,
+        Key::KeyN => 53,
+        Key::KeyM => 54,
+        // ---- 主行: G3(55) → D#4(63) ----
+        Key::KeyA => 55,
+        Key::KeyS => 56,
+        Key::KeyD => 57,
+        Key::KeyF => 58,
+        Key::KeyG => 59,
+        Key::KeyH => 60,
+        Key::KeyJ => 61,
+        Key::KeyK => 62,
+        Key::KeyL => 63,
+        // ---- 顶行: E4(64) → C#5(73) ----
+        Key::KeyQ => 64,
+        Key::KeyW => 65,
+        Key::KeyE => 66,
+        Key::KeyR => 67,
+        Key::KeyT => 68,
+        Key::KeyY => 69,
+        Key::KeyU => 70,
+        Key::KeyI => 71,
+        Key::KeyO => 72,
+        Key::KeyP => 73,
+        // ---- 数字行: D5(74) → B5(83) ----
+        Key::Num1 => 74,
+        Key::Num2 => 75,
+        Key::Num3 => 76,
+        Key::Num4 => 77,
+        Key::Num5 => 78,
+        Key::Num6 => 79,
+        Key::Num7 => 80,
+        Key::Num8 => 81,
+        Key::Num9 => 82,
+        Key::Num0 => 83,
+        _ => return None,
+    };
+    let freq = 440.0_f32 * 2.0_f32.powf((midi as f32 - 69.0) / 12.0);
+    Some(freq)
 }
 
 /// 播放带谐波的音符（基音 + 2次谐波 + 3次谐波，使音色更丰富）
@@ -122,11 +128,11 @@ fn main() {
     let args = Args::parse();
 
     println!("=== Keyboard Player ===");
-    println!("键盘映射:");
-    println!("  数字行 (1-0) : C6 – E7");
-    println!("  顶行   (q-p) : C5 – E6");
-    println!("  主行   (a-l) : C4 – D5  ← 中央 C 所在行");
-    println!("  底行   (z-m) : C3 – B3");
+    println!("键盘映射（连续半音阶，C3 → B5）:");
+    println!("  数字行 (1-0) : D5 – B5  (MIDI 74–83)");
+    println!("  顶行   (q-p) : E4 – C#5 (MIDI 64–73)");
+    println!("  主行   (a-l) : G3 – D#4 (MIDI 55–63)");
+    println!("  底行   (z-m) : C3 – F#3 (MIDI 48–54)");
     println!("按住时间越长，音符越长（1–3 秒）");
     println!("按 Ctrl+C 退出\n");
 
